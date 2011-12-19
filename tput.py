@@ -28,7 +28,7 @@ import tempfile # tempfile.NamedTemporaryFile class
 tput_state = {
  "fg": None,
  "bg": None,
- "bold": None}
+ "bold": None}  # TODO I should find out the value of bold at the initialization time of tput, and set the state mirror to that.
 
 
 # lifted straight from the COLOR_* attributes of
@@ -48,6 +48,19 @@ def GetTputState():
     return tput_state
 
 
+# removes the effects of tput on color
+def decolorize():
+    os.system("tput sgr0") # TODO understand why sgr0
+
+    # update the state mirror
+    tput_state["fg"] = None
+    tput_state["bg"] = None
+    tput_state["bold"] = False
+
+    return GetTputState()
+# end decolorize
+
+
 def colorize(fg="WHITE", bg="BLACK", bold=False):
     
     # first, convert color strings into ints
@@ -63,20 +76,22 @@ def colorize(fg="WHITE", bg="BLACK", bold=False):
     tput_state["bg"] = bg
     tput_state["bold"] = bold
 
-    # tactic: use bash_fn to call tput
 
     # reset previous fg, bg, and bold
-    bash_fn.bf_s_aa(["tput", "sgr0"])
+    decolorize()
 
+    # bold
     if bold:
-        bash_fn.bf_s_aa(["tput", "bold"])
+        os.system("tput bold")
 
     # fg
-    bash_fn.bf_s_aa(["tput", "setaf", str(fg)])
+    os.system("tput setaf " + str(fg))
 
     # bg
-    bash_fn.bf_s_aa(["tput", "setab", str(bg)])
+    os.system("tput setab " + str(bg))
 
+    # return the new state
+    # (in the user-presentable format returned by this method)
     return GetTputState()
 
 # end colorize
@@ -85,11 +100,13 @@ def colorize(fg="WHITE", bg="BLACK", bold=False):
 # fill the screen with the bg color, and
 # tput cup 0 0
 def clear():
-    bash_fn.bf_s_aa(["tput", "clear"])
+    os.system("tput clear")
 
 
 # set cursor y, x
 def cup(y, x):
-    bash_fn.bf_s_aa(["tput", "cup", str(y), str(x)])
+    os.system("tput cup " + str(y) + " " +  str(x))
+
+    return (x,y) # non-standard order
 
 
