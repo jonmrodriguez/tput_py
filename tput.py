@@ -4,9 +4,7 @@
 ###
 ### tput
 ###
-### main file
-###
-### created by "new_project"
+### module
 ###
 
 
@@ -25,7 +23,7 @@ import bash_fn # bash_fn.bf_s_aa
 import tempfile # tempfile.NamedTemporaryFile class
 
 
-tput_state = {
+_tput_state = {
  "fg": None,
  "bg": None,
  "bold": None}  # TODO I should find out the value of bold at the initialization time of tput, and set the state mirror to that.
@@ -45,7 +43,7 @@ color_LUT = {
 
 
 def GetTputState():
-    return tput_state
+    return _tput_state
 
 
 # removes the effects of tput on color
@@ -53,42 +51,45 @@ def decolorize():
     os.system("tput sgr0") # TODO understand why sgr0
 
     # update the state mirror
-    tput_state["fg"] = None
-    tput_state["bg"] = None
-    tput_state["bold"] = False
+    _tput_state["fg"] = None
+    _tput_state["bg"] = None
+    _tput_state["bold"] = False
 
     return GetTputState()
 # end decolorize
 
 
-def colorize(fg="WHITE", bg="BLACK", bold=False):
-    
-    # first, convert color strings into ints
-    # unsafe. I live on the edge, baby.
-    if isinstance(fg, str):
-        fg = color_LUT[fg]
-
-    if isinstance(bg, str):
-        bg = color_LUT[bg]
-
-    # update the state mirror
-    tput_state["fg"] = fg
-    tput_state["bg"] = bg
-    tput_state["bold"] = bold
-
+def colorize(fg=None, bg=None, bold=None):
+    # color names are all caps, like "GREEN".
+    # fg and bg take color name strings or ints. bold takes a bool
+    # if any arg is none, don't change that property at all
 
     # reset previous fg, bg, and bold
     decolorize()
 
-    # bold
-    if bold:
-        os.system("tput bold")
-
     # fg
-    os.system("tput setaf " + str(fg))
+    if fg is not None:
+        if isinstance(fg, str):
+            fg = color_LUT[fg]
+        
+        os.system("tput setaf " + str(fg))
 
     # bg
-    os.system("tput setab " + str(bg))
+    if bg is not None:
+        if isinstance(bg, str):
+            bg = color_LUT[bg]
+    
+        os.system("tput setab " + str(bg))
+
+    # bold
+    if bold is not None:
+        if bold:
+            os.system("tput bold")
+    
+    # update the state mirror
+    _tput_state["fg"] = fg
+    _tput_state["bg"] = bg
+    _tput_state["bold"] = bold
 
     # return the new state
     # (in the user-presentable format returned by this method)
