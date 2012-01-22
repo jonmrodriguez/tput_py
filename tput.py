@@ -19,7 +19,6 @@
 import sys # sys.argv
 import optparse # optparse.OptionParser class
 import os # os.system
-import bash_fn # bash_fn.bf_s_aa
 import tempfile # tempfile.NamedTemporaryFile class
 
 
