@@ -162,8 +162,7 @@ def colorize(fg=None, bg=None, bold=None):
 
 # restore to _tput_default_state
 def decolorize():
-    tds = _tput_default_state
-    return colorize(tds['fg'], tds['bg'], tds['bold'])
+    return colorize()
 
 
 # fill the screen with the bg color, and
