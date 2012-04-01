@@ -22,6 +22,22 @@ import os # os.system
 import tempfile # tempfile.NamedTemporaryFile class
 
 
+# lifted straight from the COLOR_* attributes of
+# the module curses
+color_LUT = {
+ "BLACK": 0,
+ "RED": 1,
+ "GREEN": 2,
+ "YELLOW": 3,
+ "BLUE": 4,
+ "MAGENTA": 5,
+ "CYAN": 6,
+ "WHITE": 7,
+
+ # need xterm-256color beyond this point
+ "DARK_GREY": 8,
+ # TODO more of the 256 colors
+}
 
 
 ###
@@ -41,6 +57,19 @@ def create_default_state(env):
         cluster = "corn"
     elif hostname[0:4] == "myth":
         cluster = "myth"
+
+    ssh_tty = "local_tty"
+    #
+    if 'SSH_TTY' in env:
+        ssh_tty = env['SSH_TTY']
+
+    i_am_controlmaster = (ssh_tty == "/dev/pts/0") # the 0th pseudoterminal was the first session to connect =]
+
+    # choose fg
+    fg = color_LUT['WHITE']
+
+    # choose bg
+    bg = 
 
     # TODO set fg, bg, and bold
 
@@ -65,17 +94,6 @@ _tput_state = {
 _tput_state = _tput_default_state
 
 
-# lifted straight from the COLOR_* attributes of
-# the module curses
-color_LUT = {
- "BLACK": 0,
- "BLUE": 4,
- "CYAN": 6,
- "GREEN": 2,
- "MAGENTA": 5,
- "RED": 1,
- "WHITE": 7,
- "YELLOW": 3}
 
 
 def GetTputState():
