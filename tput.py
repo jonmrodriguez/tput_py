@@ -35,9 +35,17 @@ color_LUT = {
  "WHITE": 7,
 
  # need xterm-256color beyond this point
- "DARK_GREY": 8,
+ "DARK_GRAY": 8,
  # TODO more of the 256 colors
 }
+
+
+###
+### Default color schemes
+JRODAIR_BG = "BLACK"
+CORN_MYTH_CONTROLMASTER_BG = "BLUE"
+CORN_MYTH_PASSENGER_BG = "DARK_GRAY" # passenger means not controlmaster, aka just along for the ride
+
 
 
 ###
@@ -65,34 +73,38 @@ def create_default_state(env):
 
     i_am_controlmaster = (ssh_tty == "/dev/pts/0") # the 0th pseudoterminal was the first session to connect =]
 
-    # choose fg
+    # choose default fg
     fg = color_LUT['WHITE']
 
-    # choose bg
-    bg = 
+    # choose default bg
+    #
+    bg = "FAIL AND EXPLODE. UNANTICIPATED CLUSTER."
+    #
+    if cluster == "jrodair":
+        bg = JRODAIR_BG
+    elif cluster == "corn" or cluster == "myth":
+        if i_am_controlmaster:
+            bg = CORN_MYTH_CONTROLMASTER_BG
+        else:
+            bg = CORN_MYTH_PASSENGER_BG
 
-    # TODO set fg, bg, and bold
+    # choose deafult boldness
+    bold = False
 
-    # TODO set state based on those
+    # to return
+    retval_default_state = {
+        "fg": fg,
+        "bg": bg,
+        "bold": bold
+    }
 
-    # TODO return state
+    return retval_default_state
 
 # end def
 
 
 _tput_default_state = create_default_state(env=os.environ)
-
-
-
-
-
-_tput_state = {
- "fg": None,
- "bg": None,
- "bold": None}
-
 _tput_state = _tput_default_state
-
 
 
 
@@ -109,23 +121,32 @@ def colorize(fg=None, bg=None, bold=None):
     os.system("tput sgr0")
 
     # fg
-    if fg is not None:
-        if isinstance(fg, str):
-            fg = color_LUT[fg]
-        
-        os.system("tput setaf " + str(fg))
+    #
+    if fg is None:
+        fg = _tput_default_state['fg']
+    #
+    if isinstance(fg, str):
+        fg = color_LUT[fg]
+    #
+    os.system("tput setaf " + str(fg))
 
     # bg
-    if bg is not None:
-        if isinstance(bg, str):
-            bg = color_LUT[bg]
-    
-        os.system("tput setab " + str(bg))
+    #
+    if bg is None:
+        bg = _tput_default_state['bg']
+    #
+    if isinstance(bg, str):
+        bg = color_LUT[bg]
+    #
+    os.system("tput setab " + str(bg))
 
     # bold
-    if bold is not None:
-        if bold:
-            os.system("tput bold")
+    #
+    if bold is None:
+        bold = _tput_default_state['bold']
+    #
+    if bold:
+        os.system("tput bold")
     
     # update the state mirror
     _tput_state["fg"] = fg
@@ -141,8 +162,8 @@ def colorize(fg=None, bg=None, bold=None):
 
 # restore to _tput_default_state
 def decolorize():
-    goal = _tput_default_state
-    return colorize(goal['fg'], goal['bg'], goal['bold'])
+    tds = _tput_default_state
+    return colorize(tds['fg'], tds['bg'], tds['bold'])
 
 
 # fill the screen with the bg color, and
@@ -165,7 +186,7 @@ def cup(y, x):
 # $PS1 triggers $(tput.py decolorize)
 if __name__ == "__main__":
     
-    if sys.argv[1] == "session_defaults":
+    if sys.argv[1] == "decolorize":
         decolorize()
 
     # possible TODO other commands. not urgent and YAGNI.
