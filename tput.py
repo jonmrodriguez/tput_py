@@ -38,15 +38,17 @@ color_LUT = {
  # need xterm-256color beyond this point
  "GRAY": 8,
  "DARK_BLUE": 17,
+ "DARK_RED": 52,
+ "DARK_GRAY": 233,
  # TODO more of the 256 colors
 }
 
 
 ###
 ### Default color schemes
-JRODAIR_BG = "BLACK"
+JRODAIR_BG = "DARK_GRAY"
 CORN_MYTH_CONTROLMASTER_BG = "DARK_BLUE"
-CORN_MYTH_PASSENGER_BG = "GRAY" # passenger means not controlmaster, aka just along for the ride
+CORN_MYTH_PASSENGER_BG = "DARK_RED" # passenger means not controlmaster, aka just along for the ride
 
 
 
