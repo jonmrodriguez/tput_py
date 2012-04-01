@@ -22,10 +22,47 @@ import os # os.system
 import tempfile # tempfile.NamedTemporaryFile class
 
 
+
+
+###
+### Compute _tput_default_state
+### based on (env=os.environ)
+
+def create_default_state(env):
+
+    os_type = env['OSTYPE']
+    hostname = env['HOSTNAME']
+
+    cluster = "cluster_not_recognized"
+    #
+    if os_type[0:6] == "darwin":
+        cluster = "jrodair"
+    elif hostname[0:4] == "corn":
+        cluster = "corn"
+    elif hostname[0:4] == "myth":
+        cluster = "myth"
+
+    # TODO set fg, bg, and bold
+
+    # TODO set state based on those
+
+    # TODO return state
+
+# end def
+
+
+_tput_default_state = create_default_state(env=os.environ)
+
+
+
+
+
 _tput_state = {
  "fg": None,
  "bg": None,
- "bold": None}  # TODO I should find out the value of bold at the initialization time of tput, and set the state mirror to that.
+ "bold": None}
+
+_tput_state = _tput_default_state
 
 
 # lifted straight from the COLOR_* attributes of
@@ -45,26 +82,13 @@ def GetTputState():
     return _tput_state
 
 
-# removes the effects of tput on color
-def decolorize():
-    os.system("tput sgr0") # TODO understand why sgr0
-
-    # update the state mirror
-    _tput_state["fg"] = None
-    _tput_state["bg"] = None
-    _tput_state["bold"] = False
-
-    return GetTputState()
-# end decolorize
-
-
 def colorize(fg=None, bg=None, bold=None):
     # color names are all caps, like "GREEN".
     # fg and bg take color name strings or ints. bold takes a bool
     # if any arg is none, don't change that property at all
 
     # reset previous fg, bg, and bold
-    decolorize()
+    os.system("tput sgr0")
 
     # fg
     if fg is not None:
@@ -97,6 +121,12 @@ def colorize(fg=None, bg=None, bold=None):
 # end colorize
 
 
+# restore to _tput_default_state
+def decolorize():
+    goal = _tput_default_state
+    return colorize(goal['fg'], goal['bg'], goal['bold'])
+
+
 # fill the screen with the bg color, and
 # tput cup 0 0
 def clear():
@@ -108,5 +138,18 @@ def cup(y, x):
     os.system("tput cup " + str(y) + " " +  str(x))
 
     return (x,y) # non-standard order
+
+
+
+###
+###
+
+# $PS1 triggers $(tput.py decolorize)
+if __name__ == "__main__":
+    
+    if sys.argv[1] == "session_defaults":
+        decolorize()
+
+    # possible TODO other commands. not urgent and YAGNI.
 
 
