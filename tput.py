@@ -20,6 +20,7 @@ import sys # sys.argv
 import optparse # optparse.OptionParser class
 import os # os.system
 import tempfile # tempfile.NamedTemporaryFile class
+import copy
 
 
 # lifted straight from the COLOR_* attributes of
@@ -104,7 +105,8 @@ def create_default_state(env):
 
 
 _tput_default_state = create_default_state(env=os.environ)
-_tput_state = _tput_default_state
+
+_tput_state = copy.copy(_tput_default_state)
 
 
 
